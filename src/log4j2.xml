@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" name="Encryptor" packages="" monitorInterval="10">
+    
+    <!--
+        - Use status="trace" attribute in <Configuration> above could help troubleshoot any config issues
+        
+        - monitorInterval="10" above will check changes in log4j2.xml everything 10 sec and update config change 
+          without need to restart app. Yes, one can mess around with config here & see changes take effect immediately.
+    -->
+    
+    <Appenders>
+        
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %-5p [%t] %C (%F:%L) - %m%n"/>
+        </Console>
+
+        <RollingFile name="RollingFile" fileName="logs/encryptor.log" filePattern="logs/encryptor-%d{MM-dd-yyyy}.log.gz"  
+                     ignoreExceptions="false">
+            
+            <PatternLayout>
+                <Pattern>%d %p %c [%t] %m%n</Pattern>
+            </PatternLayout>
+            
+            <Policies>
+              <TimeBasedTriggeringPolicy />
+              <SizeBasedTriggeringPolicy size="25 MB"/>
+            </Policies>
+            
+            <!-- Use filters to further refine what events should be accepted/rejected if need be -->
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+      
+        </RollingFile>
+    
+    </Appenders>
+    
+    <Loggers>
+
+        <!--
+            By setting additivity of logger to "false", the event will not be passed to any of its parent loggers, e.g. Appender  from <Root>
+        -->
+        
+        <Logger name="crypto.encryptor" level="DEBUG" additivity="false">
+              <AppenderRef ref="RollingFile" level="ERROR"/> <!-- only ERROR priority event will go to rotating log file -->
+
+              <!-- Log any priority above or equal to DEBUG here for crypto.encryptor package. Yes, the ERROR priority
+                   event above will be logged here again. The appender could refer to another log file in production so 
+                   we could have a dedicasted log file for ERROR, and another log for everything. Make troubleshoot bugs 
+                   much easier. -->   
+              <AppenderRef ref="STDOUT" level="DEBUG"/> 
+        </Logger>
+        
+        <!-- Define loggers for other packges as required, e.g. see logger above. -->
+        
+        <!-- The parent of all loggers, implications being:
+             - if loggers defined above have not defined any Appender, the appender(s) of Root will be used instead
+             - any events logged above could be logged here again a second time if additivity of logger above is 'true'
+        -->
+        <Root level="DEBUG">
+            <AppenderRef ref="STDOUT"/>
+        </Root>
+   
+    </Loggers>
+
+</Configuration>
