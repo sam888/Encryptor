@@ -12,10 +12,17 @@ Date:   24/04/2016
 
             Log4j 2.4 and greater requires Java 7, versions 2.0-alpha1 to 2.3 required Java 6
 
-    2. In Windows OS, after unzipping the zip file, open the Encryptor_x.0 folder then double click 
-       encryptor.bat 
+    2. To run it after downloading Encryptor_1.x.zip file:
+        
+       In Windows OS, after unzipping the zip file, open the Encryptor folder containing 
+       Encryptor.jar then double click encryptor.bat.
 
-* See 'encryptor walkthrough.docx' if interested to enhance, maintain or know how it's implemented.
+    3. To run it after building the project yourself:
+       Copy contents of ./dist folder (which contains the built artefacts) to a folder, also copy
+       encryptor.bat into that folder, then simply double click encryptor.bat to run.
+
+* See 'encryptor walkthrough.docx' if interested to enhance, maintain, build project or learn how 
+  it's implemented.
 
    
     ============================================================
