@@ -661,16 +661,6 @@ public class EncryptorUI extends javax.swing.JFrame {
 
     private void hashAlgorithmComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hashAlgorithmComboBoxActionPerformed
         // TODO add your handling code here:
-        
-        String hashFunction = (String)hashAlgorithmComboBox.getSelectedItem();
-        HashFunctionEnum hashFunctionEnum = HashFunctionEnum.get( hashFunction );
-        
-        if ( hashFunctionEnum == HashFunctionEnum.BCRYPT ) {
-            // BCrypt is generating its own salt so hide salt panel
-            hashFunctionSaltPanel.setVisible( false );
-        } else {
-            hashFunctionSaltPanel.setVisible( true );
-        }
     }//GEN-LAST:event_hashAlgorithmComboBoxActionPerformed
 
     private void hashAlgorithmComboBoxPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_hashAlgorithmComboBoxPropertyChange
@@ -693,24 +683,19 @@ public class EncryptorUI extends javax.swing.JFrame {
         }
         
         String data = hashDataTextField.getText();
+        String salt = hashSaltTextField.getText();
         String hashedData = null;
         
-        if ( hashFunctionEnum == HashFunctionEnum.BCRYPT ) {
-            hashedData = HashFunctionUtil.bCryptHashPassword( data );   
-        } else {
-            
-            String salt = hashSaltTextField.getText();
-            try {
-                hashedData = HashFunctionUtil.hash(salt, data, hashFunctionEnum);
-            }
-            catch (Exception ex) {
-                logger.error( "Error hashing data using algorithm '" + hashFunction + "'.", ex );
-                hashDataMessageLabel.setText( FAILED_TO_HASH );
-                ex.printStackTrace();
-                return;
-            }
+        try {
+            hashedData = HashFunctionUtil.hash(salt, data, hashFunctionEnum);
         }
-        
+        catch (Exception ex) {
+            logger.error( "Error hashing data using algorithm '" + hashFunction + "'.", ex );
+            hashDataMessageLabel.setText( FAILED_TO_HASH );
+            ex.printStackTrace();
+            return;
+        }
+       
         hashedDataTextArea.setText( hashedData );
         hashDataMessageLabel.setText("");
     }//GEN-LAST:event_hashDataButtonActionPerformed
@@ -735,7 +720,16 @@ public class EncryptorUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         String salt = null;
         try {
-            salt = HashFunctionUtil.getSalt();
+            
+            String hashFunction = (String)hashAlgorithmComboBox.getSelectedItem();
+            HashFunctionEnum hashFunctionEnum = HashFunctionEnum.get( hashFunction );
+            
+            if ( hashFunctionEnum == HashFunctionEnum.BCRYPT ) {
+                // use dedicated strong salt for BCrypt function
+                salt = HashFunctionUtil.getBCryptSalt();
+            } else {
+                salt = HashFunctionUtil.getSalt();
+            }
             
         } catch (Exception ex) {
             logger.error( FAILED_TO_GENERATE_SALT, ex );

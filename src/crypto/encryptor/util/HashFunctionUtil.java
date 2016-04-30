@@ -73,48 +73,60 @@ public final class HashFunctionUtil {
                 + " is not supported.");
         }
 
-        MessageDigest messageDigest = null;
-        try {
-            messageDigest = MessageDigest.getInstance( hashFunctionEnum.value() );
-        } catch (Exception ex) {
-            ex.printStackTrace(); 
-            logger.error( "Error hashing data by Hash function '" + hashFunctionEnum.name() + "'", ex  );
-            return null;
-        }
+        String hashedString = null;
+        if ( hashFunctionEnum == HashFunctionEnum.BCRYPT ) {
+            
+            hashedString = bCryptHashPassword( data, salt );
+            
+        } else {
+            
+            MessageDigest messageDigest = null;
+            try {
+                messageDigest = MessageDigest.getInstance( hashFunctionEnum.value() );
+            } catch (Exception ex) {
+                ex.printStackTrace(); 
+                logger.error( "Error hashing data by Hash function '" + hashFunctionEnum.name() + "'", ex  );
+                return null;
+            }
 
-        messageDigest.update(salt.getBytes());
-        messageDigest.update(data.getBytes());
-        byte[] hashedBytes = messageDigest.digest();
-
-        // Use this if need to output byte as HEX encoded string. 
-        //
-        // The use of DatatypeConverter.printHexBinary(..) is gold, see 
-        // https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java for why.
-        // return javax.xml.bind.DatatypeConverter.printHexBinary( bytesArray );
+            messageDigest.update(salt.getBytes());
+            messageDigest.update(data.getBytes());
+            byte[] hashedBytes = messageDigest.digest();
+            
+            // Use this if need to output byte as HEX encoded string. 
+            //
+            // The use of DatatypeConverter.printHexBinary(..) is gold, see 
+            // https://stackoverflow.com/questions/9655181/how-to-convert-a-byte-array-to-a-hex-string-in-java for why.
+            // return javax.xml.bind.DatatypeConverter.printHexBinary( bytesArray );
         
-        return new String( Base64.encode( hashedBytes ), UTF8);
+            hashedString = new String( Base64.encode( hashedBytes ), UTF8);
+        }
+        
+        return hashedString;
     }
     
     /**
      * 
-    * This method can be used to generate a string representing a hashed password
-    * suitable for storing in a database. It will be an OpenBSD-style crypt(3) formatted
-    * hash string of length=60.
-    * 
-    * The bcrypt workload (i.e. BCRYPT_WORKLOAD) is specified in the above static variable, a value from 10 to 31.
-    * A workload of 12 is a very reasonable safe default as of 2013.
-    * 
-    * This automatically handles secure 128-bit salt generation and storage within the hash.
-    * 
-    * @param plaintextPassowrd the plaintext password to hash
-    * @return String           a string of length 60 that represents the BCrypt hashed password
-    */
-    public static String bCryptHashPassword(String plaintextPassowrd) {
-        String salt = BCrypt.gensalt( BCRYPT_WORKLOAD );
-        String hashedPassword = BCrypt.hashpw(plaintextPassowrd, salt);
-        return hashedPassword;
+     * This method can be used to generate a string representing a hashed password
+     * suitable for storing in a database. It will be an OpenBSD-style crypt(3) formatted
+     * hash string of length=60.
+     * 
+     * The bcrypt workload (i.e. BCRYPT_WORKLOAD) is specified in the above static variable, a value from 10 to 31.
+     * A workload of 12 is a very reasonable safe default as of 2013.
+     * 
+     * This automatically handles secure 128-bit salt generation and storage within the hash.
+     * 
+     * @param plaintextPassowrd the plaintext password to hash
+     * @param salt              salt for BCrypt hash function. Use getBCryptSalt() to return dedicated strong salt for BCrypt hash.
+     * @return String           a string of length 60 that represents the BCrypt hashed password
+     */
+    public static String bCryptHashPassword(String plaintextPassowrd, String salt) {
+        return BCrypt.hashpw(plaintextPassowrd, salt);
     }
     
+    public static String getBCryptSalt() {
+        return BCrypt.gensalt( BCRYPT_WORKLOAD );
+    }
     
     public static boolean isHashFunctionSupported(HashFunctionEnum hashFunctionEnum ) {
         if ( hashFunctionEnum == null ) {
