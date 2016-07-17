@@ -89,7 +89,7 @@ public class EncryptorUI extends javax.swing.JFrame {
         hashDataMessageLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Encryptor V1.0");
+        setTitle("Encryptor V1.1");
 
         symmetricKeyEncryptTabbedPane.setAutoscrolls(true);
         symmetricKeyEncryptTabbedPane.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
